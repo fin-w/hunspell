@@ -7,14 +7,12 @@ case $# in
 -p: print only prefixed forms";
 	exit 1;;
 esac
-
 # this switches whether to print only suffixed, prefixed or all forms of stem
 fx=0
 case $1 in
 	-s) fx=1; shift;;
 	-p) fx=2; shift;;
 esac
-
 # clear any previous temporary dictionary
 test -h /tmp/wordforms.aff && rm /tmp/wordforms.aff
 # make a symbolic link of the aff file
@@ -55,24 +53,25 @@ BEGIN {
 
 # this runs on the .dic file to get stem and flag data
 NR==FNR && NR>1 && /\// && NF==1 {
-	split($1,a,"/")
-	stem=a[1]
-	if (a[2]) {
+	split($1,dic_line,"/")
+	stem=dic_line[1]
+	if (dic_line[2]) {
 		use_flags=1
-		split(a[2],b, (flag_type=="num" ? "," : "" ), blen)
+		split(dic_line[2],flag_particles, (flag_type=="num" ? "," : "" ), blen)
 		# correct long flags being split into separate characters
-		i=1
 		if (flag_type=="long") {
-			for (i=1; i<length(blen); i=i+2) {
-				long_flags[i]=b[i] b[i+1]
+			for (i in flag_particles) {
+				if (i%2==0 && i!=0) {
+					long_flags[flag_particles[i-1] flag_particles[i]]=flag_particles[i-1] flag_particles[i]
+				}
 			}
 			for (f in long_flags) {
 				stem_flags[length(stem_flags)+1]=long_flags[f]
 			}
 		}
 		else {
-			for (f in b) {
-				stem_flags[length(stem_flags)+1]=b[f]
+			for (f in flag_particles) {
+				stem_flags[length(stem_flags)+1]=flag_particles[f]
 			}
 		}
 	}
@@ -91,7 +90,7 @@ NR!=FNR && FNR==1 {
 		flag_regex=flag_regex (flag_type!="unicode" ? "(" : "[")
 		for (flag in stem_flags) {
 			if (stem_flags[flag]) {
-				flag_regex=flag_regex stem_flags[flag] (flag_type!="unicode" ? "," : "")
+				flag_regex=flag_regex stem_flags[flag] (flag_type!="unicode" ? "|" : "")
 			}
 		}
 		if (flag_type!="unicode") flag_regex=substr(flag_regex, 1, (length(flag_regex) - 1));
@@ -100,7 +99,6 @@ NR!=FNR && FNR==1 {
 	else {
 		# if no flags have been used then
 		# only the dictionary form is correct
-		print stem
 		exit 0
 	}
 }
@@ -142,6 +140,12 @@ NR!=FNR && fx!=1 && /^PFX/ && NF>4 && $4 !~ "[1-9][0-9]*" {
 
 # this runs after processing the .aff file
 END {
+	# if there are no variations to generate
+	if (!use_flags) {
+		print stem
+		exit 0
+	}
+	
 	wlen=length(stem)
 	
 	# every potential word goes in this array
