@@ -46,11 +46,6 @@ esac
 
 # generate the different potential words
 awk -v fx="$fx" -v complex_prefixes="$complex_prefixes" -v flag_type="$flag_type" '
-# this runs before processing the .aff file
-BEGIN {
-	use_flags=0
-}
-
 function get_regex_from_flags(input_flags) {
 	delete flag_array
 	delete long_flags
@@ -96,17 +91,11 @@ function get_regex_from_flags(input_flags) {
 NR==FNR && NR>1 && /\// && NF==1 {
 	split($1,dic_line,"/")
 	stem=dic_line[1]
-	if (dic_line[2]) {
-		use_flags=1
-		split(dic_line[2],flag_particles, (flag_type=="num" ? "," : "" ), blen)
-		stem_flags=stem_flags dic_line[2]
-	}
+	if (dic_line[2]) stem_flags=stem_flags dic_line[2];
 }
 
 # this runs on the .dic file to get any stems without flags
-NR==FNR && NR>1 && NF==1 && !/\// {
-	stem=$1
-}
+NR==FNR && NR>1 && NF==1 && !/\// { stem=$1 }
 
 # this runs on the first line of the .aff file
 # to prepare regex to search the file with
