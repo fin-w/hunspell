@@ -181,7 +181,7 @@ END {
 					pref_pref_stem=(sub_add_and_flags[1]=="0" ? "" : sub_add_and_flags[1]) substr(pref_stem, sub_cut_chars+1)
 					pref_pref_stem_length=length(pref_pref_stem)
 					all_variations[pref_pref_stem]=pref_pref_stem
-					for (sub_sub_affix in sub_regexed_affixes) {
+					for (sub_sub_affix in regexed_affixes) {
 						split(sub_sub_affix, sub_sub_affix_particles)
 						split(sub_sub_affix_particles[4], sub_sub_add_and_flags, "/")
 						sub_sub_cut_chars=(sub_sub_affix_particles[3]=="0" ? 0 : length(sub_sub_affix_particles[3]))
@@ -212,7 +212,7 @@ END {
 				if (!complex_prefixes && sub_affix_particles[1]=="SFX" && stem_suff_length>sub_cut_chars && stem_suff ~ ".*"sub_affix_particles[5]"$") {
 					stem_suff_suff=substr(stem_suff, 1, stem_suff_length-sub_cut_chars) (sub_add_and_flags[1]=="0" ? "": sub_add_and_flags[1])
 					all_variations[stem_suff_suff]=stem_suff_suff
-					for (sub_sub_affix in sub_regexed_affixes) {
+					for (sub_sub_affix in regexed_affixes) {
 						split(sub_sub_affix, sub_sub_affix_particles)
 						if (sub_sub_affix_particles[1]!="PFX" || stem_suff_suff_length>sub_sub_cut_chars || stem_suff_suff !~ "^"sub_sub_affix_particles[5]".*") continue;
 						split(sub_sub_affix_particles[4], sub_sub_add_and_flags, "/")
