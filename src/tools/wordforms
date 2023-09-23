@@ -230,4 +230,4 @@ END {
 		print variation
 	}
 }
-' /tmp/wordforms.dic /tmp/wordforms.aff | hunspell -d /tmp/wordforms -G -l
+' /tmp/wordforms.dic /tmp/wordforms.aff | hunspell -d /tmp/wordforms -G -l | sort -u
